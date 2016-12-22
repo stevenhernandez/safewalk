@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<ScrollView android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<EditText android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="This is text in an edit text"
+    android:id="@+id/editText"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
 
-    <android.support.design.widget.TabLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tab_host">
-        <android.support.design.widget.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test sfesjfwofiwefhweoifhweofwjef we" />
-        <android.support.design.widget.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stuff and things"/>
-    </android.support.design.widget.TabLayout>
-
-
-</LinearLayout>
+    </ScrollView>
+<!--
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>-->

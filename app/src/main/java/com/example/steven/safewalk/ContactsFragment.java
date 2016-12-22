@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -34,7 +35,9 @@ import static android.app.Activity.RESULT_OK;
  * Created by Steven on 12/12/2016.
  */
 
-public class ContactsFragment extends Fragment {
+public class ContactsFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AdapterView.OnItemClickListener{
 
     @SuppressLint("InlinedApi")
     private static final String[] PROJECTION =
@@ -116,10 +119,12 @@ public class ContactsFragment extends Fragment {
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        //getLoaderManager().initLoader(0, null, this);
+        //EditText editText = (EditText) getActivity().findViewById(R.id.editText);
+        //editText.setText("Stuff amd things");
+        /*getLoaderManager().initLoader(0, null, this);
         // Gets the ListView from the View list of the parent activity
-        /*mContactsList =
-                (ListView) getActivity().findViewById(R.id.contact_list_view);
+        //mContactsList =
+        //        (ListView) getActivity().findViewById(R.id.contact_list_view);
         // Gets a CursorAdapter
         mCursorAdapter = new SimpleCursorAdapter(
                 getActivity(),
@@ -130,21 +135,21 @@ public class ContactsFragment extends Fragment {
         mCursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                if(view.getId() == R.id.contact_image) {
-                    *//*Bitmap[] array = new Bitmap[2];
+                *//*if(view.getId() == R.id.contact_image) {
+                    *//**//*Bitmap[] array = new Bitmap[2];
                         byte[] data = cursor.getBlob(columnIndex);
                         if (data != null) {
                             array[0] = BitmapFactory.decodeStream(new ByteArrayInputStream(data));
                         }
                     if (array[0] != null) {
                         ((ImageView) view).setImageBitmap(array[0]);
-                    }*//*
+                    }*//**//*
                     Bitmap myImg = BitmapFactory.decodeFile(cursor.getString(columnIndex));
                     if(cursor.getString(3) != null) {
                         ((ImageView) view).setImageBitmap(myImg);
                     }
                     return true;
-                }
+                }*//*
                 return false;
             }
         });
@@ -155,21 +160,21 @@ public class ContactsFragment extends Fragment {
         mContactsList.setOnItemClickListener(this);*/
     }
 
-    /*public Uri getPhotoUri(Integer contactid) {
+    public Uri getPhotoUri(Integer contactid) {
         Cursor photoCur = getActivity().getApplicationContext().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,null, ContactsContract.Contacts.IN_VISIBLE_GROUP + " = '1'", null, ContactsContract.Contacts.DISPLAY_NAME+" COLLATE LOCALIZED ASC");
         photoCur.moveToPosition(contactid);
         Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, photoCur.getLong(photoCur.getColumnIndex(ContactsContract.Contacts._ID)));
         Uri photo = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
         return photo;
-    }*/
+    }
 
 
-/*    @Override
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        *//*
+        /*
          * Makes search string into pattern and
          * stores it in the selection array
-         *//*
+         */
         mSelectionArgs[0] = "%" + "" + "%";
         // Starts the query
         return new CursorLoader(
@@ -180,10 +185,10 @@ public class ContactsFragment extends Fragment {
                 mSelectionArgs,
                 ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME+" ASC"
         );
-    }*/
+    }
 
 
-    /*@Override
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // Put the result Cursor in the adapter for the ListView
         mCursorAdapter.swapCursor(data);
@@ -193,11 +198,11 @@ public class ContactsFragment extends Fragment {
     public void onLoaderReset(Loader<Cursor> loader) {
         // Delete the reference to the existing Cursor
         mCursorAdapter.swapCursor(null);
-    }*/
+    }
 
     //@Override
     public void onItemClick(AdapterView<?> parent, View item, int position, long rowID) {
-           /* // Get the Cursor
+           // Get the Cursor
             Cursor cursor = ((SimpleCursorAdapter) parent.getAdapter()).getCursor();
             // Move to the selected contact
             cursor.moveToPosition(position);
@@ -206,7 +211,7 @@ public class ContactsFragment extends Fragment {
             // Get the selected LOOKUP KEY
             mContactKey = cursor.getString(LOOKUP_KEY_INDEX);
             // Create the contact's content Uri
-            mContactUri = ContactsContract.Contacts.getLookupUri(mContactId, mContactKey);*/
+            mContactUri = ContactsContract.Contacts.getLookupUri(mContactId, mContactKey);
         /*
          * You can use mContactUri as the content URI for retrieving
          * the details for a contact.
@@ -256,11 +261,11 @@ public class ContactsFragment extends Fragment {
         }
     }
 
-    /*private void startContactDetailsActivity() {
+    private void startContactDetailsActivity() {
         Intent contactDetailsIntent = new Intent(getActivity(), ContactDetailsActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("contactKey", mContactKey);
         contactDetailsIntent.putExtras(bundle);
         startActivity(contactDetailsIntent, bundle);
-    }*/
+    }
 }
