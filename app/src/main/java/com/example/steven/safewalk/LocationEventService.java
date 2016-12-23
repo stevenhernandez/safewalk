@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by Steven on 12/21/2016.
  */
-public class LocationEventService extends IntentService implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener  {
+public class LocationEventService extends IntentService implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, TrafficResponseListener  {
 
 
     private GoogleApiClient mGoogleApiClient;
@@ -62,6 +62,21 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
         }
         mGoogleApiClient.connect();
         this.intent = intent;
+
+    }
+
+    @Override
+    public void TrafficResponseCompleted(TrafficResponse trafficResponse) {
+        TrafficElement trafficElement = trafficResponse.getRows().get(0).getElements().get(0);
+
+        if (trafficElement.getDuration_in_traffic() != null) {
+            trackingRequest.setEta(trafficElement.getDuration_in_traffic().getValue());
+        } else {
+            trackingRequest.setEta(trafficElement.getDuration().getValue());
+        }
+        //trackingRequest.setEta(trafficResponse.getRows()[0].getElements()[0].getDuration_in_traffic().getValue());
+        Toast.makeText(getApplicationContext(), trafficResponse.getRows().get(0).getElements().get(0).getDistance().getText(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), trafficResponse.getRows().get(0).getElements().get(0).getDuration().getText(), Toast.LENGTH_LONG).show();
         if(mTimer != null) {
             mTimer.cancel();
         } else {
@@ -94,28 +109,23 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        trackingRequest = new TrackingRequest();
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, createLocationRequest(), this);
-        trackingRequest.setCurrentLocation(LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient));
-        trackingRequest.setPreviousLocation(trackingRequest.getCurrentLocation());
-        Location destination = getLocationFromAddress(intent.getExtras().getString("destination"));
-        trackingRequest.setDestination(destination);
-        TripRequest request = new TripRequest();
-        request.setDestination(intent.getExtras().getString("destination"));
-        request.setMode(intent.getExtras().getString("mode"));
-        request.setOrigin(trackingRequest.getCurrentLocation());
-        try {
-            TrafficResponse trafficResponse = new DirectionsService().execute(request).get();
-            Toast.makeText(getApplicationContext(), trafficResponse.getRows()[0].getElements()[0].getDistance().getText(), Toast.LENGTH_LONG).show();
-            Toast.makeText(getApplicationContext(), trafficResponse.getRows()[0].getElements()[0].getDuration().getText(), Toast.LENGTH_LONG).show();
-            //Toast.makeText(getApplicationContext(), trafficResponse.getRows()[0].getElements()[0].getDuration_in_traffic().getText(), Toast.LENGTH_LONG).show();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, createLocationRequest(), this);
+            Location destination = getLocationFromAddress(intent.getExtras().getString("destination"));
+            TripRequest request = new TripRequest();
+            request.setDestination(destination);
+            request.setMode(intent.getExtras().getString("mode"));
+            request.setOrigin(LocationServices.FusedLocationApi.getLastLocation(
+                    mGoogleApiClient));
 
+            trackingRequest = new TrackingRequest();
+            trackingRequest.setCurrentLocation(request.getOrigin());
+            trackingRequest.setPreviousLocation(trackingRequest.getCurrentLocation());
+            trackingRequest.setDestination(destination);
+            trackingRequest.setContact(intent.getExtras().getString("contact"));
+
+            DirectionsService directionsService = new DirectionsService();
+            directionsService.delegate = this;
+            directionsService.execute(request);
     }
 
     protected LocationRequest createLocationRequest() {
@@ -144,7 +154,6 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
             p1 = new Location("Destination");
             p1.setLatitude(location.getLatitude());
             p1.setLongitude(location.getLongitude());
-            return p1;
         } catch (IOException e) {
             e.printStackTrace();
         }

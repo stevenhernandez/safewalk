@@ -5,7 +5,7 @@ package com.example.steven.safewalk;
  */
 public class DurationElement {
     private String text;
-    private String value;
+    private long value;
 
     public String getText() {
         return text;
@@ -15,11 +15,11 @@ public class DurationElement {
         this.text = text;
     }
 
-    public String getValue() {
+    public long getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(long value) {
         this.value = value;
     }
 }

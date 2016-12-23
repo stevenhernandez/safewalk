@@ -2,6 +2,8 @@ package com.example.steven.safewalk;
 
 import android.location.Location;
 
+import java.util.Timer;
+
 /**
  * Created by Steven on 12/21/2016.
  */
@@ -12,7 +14,9 @@ public class TrackingRequest {
     private Location currentLocation;
     private Location destination;
     private String contact;
-    private int counter;
+    private long eta;
+    private int counter = 0;
+
 
     public Location getPreviousLocation() {
         return previousLocation;
@@ -44,5 +48,21 @@ public class TrackingRequest {
 
     public void setCounter(int counter) {
         this.counter = counter;
+    }
+
+    public String getContact() {
+        return contact;
+    }
+
+    public void setContact(String contact) {
+        this.contact = contact;
+    }
+
+    public long getEta() {
+        return eta;
+    }
+
+    public void setEta(long eta) {
+        this.eta = eta;
     }
 }

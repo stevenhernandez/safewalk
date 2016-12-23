@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity
 
     private GoogleApiClient mGoogleApiClient;
     private Location currentLocation;
+    private String contact = "";
+    private Intent mServiceEvent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +101,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        /*if (savedInstanceState == null) {
-            Fragment newFragment = new ContactsFragment();
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            //noinspection ResourceType
-            ft.add(newFragment, "Tag").commit();
-        }*/
     }
 
     private void startLocaionEventService() {
@@ -119,17 +115,22 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         RadioGroup radioGroup = (RadioGroup) findViewById(R.id.mode_grp);
-        TripRequest request = new TripRequest();
-        request.setOrigin(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
-        request.setDestination(((EditText) findViewById(R.id.destination_edit_text)).getText().toString());
+        String mode = null;
         for(int i = 0; i < radioGroup.getChildCount(); i++) {
             if(((RadioButton)radioGroup.getChildAt(i)).isChecked()) {
-                request.setMode(((RadioButton) radioGroup.getChildAt(i)).getText().toString());
+               mode = ((RadioButton) radioGroup.getChildAt(i)).getText().toString();
             }
         }
-        Intent mServiceEvent = new Intent(getApplicationContext(), LocationEventService.class);
-        mServiceEvent.putExtra("destination", request.getDestination());
-        mServiceEvent.putExtra("mode", request.getMode());
+        if(contact.equals("")) {
+            return;
+        }
+        if(mServiceEvent != null) {
+            stopService(mServiceEvent);
+        }
+        mServiceEvent = new Intent(getApplicationContext(), LocationEventService.class);
+        mServiceEvent.putExtra("destination", ((EditText) findViewById(R.id.destination_edit_text)).getText().toString());
+        mServiceEvent.putExtra("mode", mode);
+        mServiceEvent.putExtra("contact", contact);
         startService(mServiceEvent);
     }
 
@@ -164,10 +165,8 @@ public class MainActivity extends AppCompatActivity
             int  nameIndex =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             phoneNo = cursor.getString(phoneIndex);
             name = cursor.getString(nameIndex);
-            SmsManager.getDefault().sendTextMessage("+14806008313", null, "test message", null, null);
-            // Set the value to the textviews
-            //textView1.setText(name);
-            //textView2.setText(phoneNo);
+            //SmsManager.getDefault().sendTextMessage("+14806008313", null, "test message", null, null);
+            contact = phoneNo;
         } catch (Exception e) {
             e.printStackTrace();
         }

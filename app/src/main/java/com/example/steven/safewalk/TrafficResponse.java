@@ -10,7 +10,7 @@ public class TrafficResponse {
 
     private List<String> destination_addresses;
     private List<String> origin_addresses;
-    private TrafficInfo[] rows;
+    private List<TrafficInfo> rows;
 
     public List<String> getDestination_addresses() {
         return destination_addresses;
@@ -28,11 +28,11 @@ public class TrafficResponse {
         this.origin_addresses = origin_addresses;
     }
 
-    public TrafficInfo[] getRows() {
+    public List<TrafficInfo> getRows() {
         return rows;
     }
 
-    public void setRows(TrafficInfo[] rows) {
+    public void setRows(List<TrafficInfo> rows) {
         this.rows = rows;
     }
 }

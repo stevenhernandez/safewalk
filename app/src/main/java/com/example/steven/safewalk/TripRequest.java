@@ -9,7 +9,7 @@ import android.location.Location;
 public class TripRequest {
 
     private Location origin;
-    private String destination;
+    private Location destination;
     private String mode;
 
 
@@ -21,11 +21,11 @@ public class TripRequest {
         this.mode = mode;
     }
 
-    public String getDestination() {
+    public Location getDestination() {
         return destination;
     }
 
-    public void setDestination(String destination) {
+    public void setDestination(Location destination) {
         this.destination = destination;
     }
 

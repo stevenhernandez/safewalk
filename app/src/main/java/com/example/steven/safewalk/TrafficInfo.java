@@ -1,16 +1,18 @@
 package com.example.steven.safewalk;
 
+import java.util.List;
+
 /**
  * Created by Steven on 12/20/2016.
  */
 public class TrafficInfo {
-    private TrafficElement[] elements;
+    private List<TrafficElement> elements;
 
-    public TrafficElement[] getElements() {
+    public List<TrafficElement> getElements() {
         return elements;
     }
 
-    public void setElements(TrafficElement[] element) {
+    public void setElements(List<TrafficElement> element) {
         this.elements = element;
     }
 }

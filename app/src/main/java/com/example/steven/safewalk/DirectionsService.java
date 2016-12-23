@@ -17,6 +17,7 @@ import retrofit2.Retrofit;
  */
 
 class DirectionsService extends AsyncTask<TripRequest, Void, TrafficResponse> {
+    public TrafficResponseListener delegate = null;
 
 
     TrafficResponse doSomething(TripRequest tripRequest){
@@ -25,7 +26,7 @@ class DirectionsService extends AsyncTask<TripRequest, Void, TrafficResponse> {
                     .baseUrl("https://maps.googleapis.com/")
                     .build();
             DirectionsAPI service = retrofit.create(DirectionsAPI.class);
-            Call<ResponseBody> stuff = service.getDirections(tripRequest.getOrigin().getLatitude() + "," + tripRequest.getOrigin().getLongitude(), tripRequest.getDestination(), tripRequest.getMode().toLowerCase(), String.valueOf(System.currentTimeMillis()));
+            Call<ResponseBody> stuff = service.getDirections(tripRequest.getOrigin().getLatitude() + "," + tripRequest.getOrigin().getLongitude(), tripRequest.getDestination().getLatitude() + "," + tripRequest.getDestination().getLongitude(), tripRequest.getMode().toLowerCase(), String.valueOf(System.currentTimeMillis()));
             Response<ResponseBody> responseBody = stuff.execute();
             return new Gson().fromJson(responseBody.body().string(), TrafficResponse.class);
         } catch (IOException e) {
@@ -37,5 +38,10 @@ class DirectionsService extends AsyncTask<TripRequest, Void, TrafficResponse> {
     @Override
     protected TrafficResponse doInBackground(TripRequest... params) {
         return doSomething(params[0]);
+    }
+
+    @Override
+    protected void onPostExecute(TrafficResponse result) {
+        delegate.TrafficResponseCompleted(result);
     }
 }
