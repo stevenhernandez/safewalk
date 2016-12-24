@@ -17,19 +17,17 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutionException;
 
 
 /**
  * Created by Steven on 12/21/2016.
  */
-public class LocationEventService extends IntentService implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, TrafficResponseListener  {
+public class LocationEventService extends IntentService implements  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, TrafficResponseListener {
 
 
     private GoogleApiClient mGoogleApiClient;
@@ -72,28 +70,54 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
         if (trafficElement.getDuration_in_traffic() != null) {
             trackingRequest.setEta(trafficElement.getDuration_in_traffic().getValue());
         } else {
-            trackingRequest.setEta(trafficElement.getDuration().getValue());
+            if(trafficElement.getDuration() != null) {
+                trackingRequest.setEta(trafficElement.getDuration().getValue());
+            } else {
+                Toast.makeText(getApplicationContext(), "Unable to get traffic details please check the address and try again", Toast.LENGTH_LONG).show();
+                return;
+            }
         }
         //trackingRequest.setEta(trafficResponse.getRows()[0].getElements()[0].getDuration_in_traffic().getValue());
         Toast.makeText(getApplicationContext(), trafficResponse.getRows().get(0).getElements().get(0).getDistance().getText(), Toast.LENGTH_LONG).show();
         Toast.makeText(getApplicationContext(), trafficResponse.getRows().get(0).getElements().get(0).getDuration().getText(), Toast.LENGTH_LONG).show();
         if(mTimer != null) {
             mTimer.cancel();
-        } else {
-            // recreate new
-            mTimer = new Timer();
         }
+        // recreate new
+        mTimer = new Timer();
         // schedule task
         mTimer.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, NOTIFY_INTERVAL);
 
     }
 
-    class TimeDisplayTimerTask extends TimerTask {
+    class TimeDisplayTimerTask extends TimerTask implements TrackingServiceListener {
 
         @Override
         public void run() {
             // run on another thread
-            new TrackingService().execute(trackingRequest);
+            TrackingService trackingService = new TrackingService();
+            trackingService.delegate = this;
+            trackingService.execute(trackingRequest);
+        }
+
+        @Override
+        public void arrived() {
+            mTimer.cancel();
+            mTimer = null;
+            mGoogleApiClient.disconnect();
+        }
+
+
+        @Override
+        public void updateRequest(TrackingRequest request) {
+            trackingRequest = request;
+        }
+
+        @Override
+        public void timeout() {
+            mTimer.cancel();
+            mTimer = null;
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -119,7 +143,8 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
 
             trackingRequest = new TrackingRequest();
             trackingRequest.setCurrentLocation(request.getOrigin());
-            trackingRequest.setPreviousLocation(trackingRequest.getCurrentLocation());
+            trackingRequest.getPreviousLocations().add(request.getOrigin());
+            trackingRequest.setClosestLocation(request.getOrigin());
             trackingRequest.setDestination(destination);
             trackingRequest.setContact(intent.getExtras().getString("contact"));
 
@@ -130,7 +155,7 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(6000);
+        locationRequest.setInterval(NOTIFY_INTERVAL);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return locationRequest;
@@ -172,7 +197,10 @@ public class LocationEventService extends IntentService implements  GoogleApiCli
 
     @Override
     public void onLocationChanged(Location location) {
-        trackingRequest.setPreviousLocation(trackingRequest.getCurrentLocation());
+        if (trackingRequest.getPreviousLocations().size() > 4) {
+            trackingRequest.getPreviousLocations().remove(0);
+        }
+        trackingRequest.getPreviousLocations().add(trackingRequest.getCurrentLocation());
         trackingRequest.setCurrentLocation(location);
     }
 }
